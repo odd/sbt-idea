@@ -32,7 +32,10 @@ class IdeaProjectDescriptor(val project: IdeaProject, val log: Logger) extends S
             <root url={String.format("jar://$PROJECT_DIR$/%s!/", relativePath(buildScalaLibraryJar))} />
           </CLASSES>
           <JAVADOC />
-          <SOURCES />
+          <SOURCES>
+		    <root url={String.format("jar://$PROJECT_DIR$/%s!/", relativePath(buildScalaCompilerJar)).replace("\\.jar!/", "-sources.jar!/")} />
+			<root url={String.format("jar://$PROJECT_DIR$/%s!/", relativePath(buildScalaLibraryJar)).replace("\\.jar!/", "-sources.jar!/")} />
+		  </SOURCES>
         </library>
         <library name="defScala">
           <CLASSES>
