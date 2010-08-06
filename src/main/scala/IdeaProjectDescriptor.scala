@@ -5,7 +5,7 @@ class IdeaProjectDescriptor(val project: IdeaProject, val log: Logger) extends S
   val path = String.format("%s/%s.ipr", projectPath, project.name)
 
   def content: Node = {
-    <project version="4">
+	<project version="4">
       <component name="ProjectDetails">
         <option name="projectName" value={project.name} />
       </component>
@@ -33,8 +33,8 @@ class IdeaProjectDescriptor(val project: IdeaProject, val log: Logger) extends S
           </CLASSES>
           <JAVADOC />
           <SOURCES>
-		    <root url={String.format("jar://$PROJECT_DIR$/%s!/", relativePath(buildScalaCompilerJar)).replace("\\.jar!/", "-sources.jar!/")} />
-			<root url={String.format("jar://$PROJECT_DIR$/%s!/", relativePath(buildScalaLibraryJar)).replace("\\.jar!/", "-sources.jar!/")} />
+		    <root url={String.format("jar://$PROJECT_DIR$/%s!/", relativePath(buildScalaCompilerJar)).replaceAll("\\.jar!/", "-sources.jar!/")} />
+			<root url={String.format("jar://$PROJECT_DIR$/%s!/", relativePath(buildScalaLibraryJar)).replaceAll("\\.jar!/", "-sources.jar!/")} />
 		  </SOURCES>
         </library>
         <library name="defScala">
