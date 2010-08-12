@@ -25,6 +25,9 @@ class IdeaProjectDescriptor(val project: IdeaProject, val log: Logger) extends S
         <output url="file://$PROJECT_DIR$/out" />
       </component>
       }
+      <component name="VcsDirectoryMappings">
+		<mapping directory="" vcs="Git" />
+      </component>
       <component name="libraryTable">
         <library name="buildScala">
           <CLASSES>
