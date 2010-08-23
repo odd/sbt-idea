@@ -37,6 +37,9 @@ class IdeaProjectDescriptor(val project: BasicDependencyProject, val log: Logger
         <output url="file://$PROJECT_DIR$/out" />
       </component>
       }
+      <component name="VcsDirectoryMappings">
+        <mapping directory="" vcs="Git" />
+      </component>
       <component name="libraryTable">
         <library name="buildScala">
           <CLASSES>
