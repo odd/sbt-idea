@@ -8,10 +8,10 @@ class SbtProjectDefinitionIdeaModuleDescriptor(val project: BasicDependencyProje
     <module type="JAVA_MODULE" version="4">
       <component name="FacetManager">
         <facet type="scala" name="Scala">
-			<configuration>
-				<option name="compilerLibraryLevel" value="Project" />
-				<option name="compilerLibraryName" value="defScala" />
-			</configuration>
+          <configuration>
+            <option name="compilerLibraryLevel" value="Project" />
+            <option name="compilerLibraryName" value="defScala" />
+          </configuration>
         </facet>
       </component>
       <component name="NewModuleRootManager" inherit-compiler-output="true">
@@ -44,16 +44,26 @@ class SbtProjectDefinitionIdeaModuleDescriptor(val project: BasicDependencyProje
               <SOURCES />
             </library>
           </orderEntry>
-					<orderEntry type="module-library">
-					  <library>
-					    <CLASSES>
-					      <root url="file://$MODULE_DIR$/build/lib" />
-					    </CLASSES>
-					    <JAVADOC />
-					    <SOURCES />
-					    <jarDirectory url="file://$MODULE_DIR$/build/lib" recursive="false" />
-					  </library>
-					</orderEntry>
+          <orderEntry type="module-library">
+            <library>
+              <CLASSES>
+                <root url="file://$MODULE_DIR$/build/lib" />
+              </CLASSES>
+              <JAVADOC />
+              <SOURCES />
+              <jarDirectory url="file://$MODULE_DIR$/build/lib" recursive="false" />
+            </library>
+          </orderEntry>
+          <orderEntry type="module-library">
+            <library>
+              <CLASSES>
+                <root url={String.format("file://$MODULE_DIR$/plugins/lib_managed/scala_%s", project.defScalaVersion.value)} />
+              </CLASSES>
+              <JAVADOC />
+              <SOURCES />
+              <jarDirectory url={String.format("file://$MODULE_DIR$/plugins/lib_managed/scala_%s", project.defScalaVersion.value)} recursive="false" />
+            </library>
+          </orderEntry>
         }
       </component>
     </module>
