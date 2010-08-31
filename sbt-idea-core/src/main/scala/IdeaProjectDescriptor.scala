@@ -10,6 +10,9 @@ import xml.{XML, Node}
 class IdeaProjectDescriptor(val project: BasicDependencyProject, val log: Logger) extends SaveableXml with ProjectPaths {
   val path = String.format("%s/%s.ipr", projectPath, project.name)
   val env = new IdeaEnvironment(project)
+  val vcsName = List("svn", "Git").foldLeft("") { (res, vcs) =>
+    if (project.path("." + vcs.toLowerCase).exists) vcs else res
+  }
 
   def content: Node = {
     <project version="4">
@@ -19,7 +22,7 @@ class IdeaProjectDescriptor(val project: BasicDependencyProject, val log: Logger
       <component name="ProjectModuleManager">
         <modules>
         {
-          env.ideaIncludeSbtProjectDefinitionModule.value match {
+          env.includeSbtProjectDefinitionModule.value match {
             case true => <module fileurl={"file://$PROJECT_DIR$/project/sbt_project_definition.iml"} filepath={"$PROJECT_DIR$/project/sbt_project_definition.iml"} />
             case _ =>
           }
@@ -33,8 +36,11 @@ class IdeaProjectDescriptor(val project: BasicDependencyProject, val log: Logger
         </modules>
       </component>
       {
-      <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name={env.ideaJdkName.value} project-jdk-type="JavaSDK">
+      <component name="ProjectRootManager" version="2" languageLevel={env.javaLanguageLevel.value} assert-keyword="true" jdk-15="true" project-jdk-name={env.projectJdkName.value} project-jdk-type="JavaSDK">
         <output url="file://$PROJECT_DIR$/out" />
+      </component>
+      <component name="VcsDirectoryMappings">
+        <mapping directory="" vcs={vcsName} />
       </component>
       }
       <component name="VcsDirectoryMappings">
