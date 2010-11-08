@@ -10,6 +10,7 @@ import xml.{UnprefixedAttribute, NodeSeq, Node, NodeBuffer}
 
 class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger) extends SaveableXml with ProjectPaths {
   val path = String.format("%s/%s.iml", projectPath, project.name)
+  val env = new IdeaEnvironment(project.rootProject)
 
   def content: Node = {
     <module type="JAVA_MODULE" version="4">
@@ -27,13 +28,18 @@ class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger)
           }
         }
       </component>
-      <component name="NewModuleRootManager" inherit-compiler-output="false">
-        <output url={"file://$MODULE_DIR$/" + project.asInstanceOf[ScalaPaths].mainCompilePath.relativePath.toString} />
-        <output-test url={"file://$MODULE_DIR$/" + project.asInstanceOf[ScalaPaths].testCompilePath.relativePath.toString} />
+      <component name="NewModuleRootManager" inherit-compiler-output={env.projectOutputPath.get.isDefined.toString}>
+        {
+          if (env.projectOutputPath.get.isEmpty) {
+            <output url={"file://$MODULE_DIR$/" + project.asInstanceOf[ScalaPaths].mainCompilePath.relativePath.toString} />
+            <output-test url={"file://$MODULE_DIR$/" + project.asInstanceOf[ScalaPaths].testCompilePath.relativePath.toString} />
+          } else scala.xml.Null
+        }
         <exclude-output />
         <content url="file://$MODULE_DIR$">
           { nodePerExistingSourceFolder("src/main/scala" :: "src/main/resources" :: "src/main/java" :: "src/it/scala" :: Nil) }
           { nodePerExistingTestSourceFolder("src/test/scala" :: "src/test/resources" :: "src/test/java" :: Nil) }
+          { if (env.excludeLibmanagedFolders.value) <excludeFolder url="file://$MODULE_DIR$/lib_managed" /> else scala.xml.Null }
           <excludeFolder url="file://$MODULE_DIR$/target" />
         </content>
         {
@@ -70,14 +76,16 @@ class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger)
           val JavaDocJar = "-javadoc" + Jar
           val JavaDocs = GlobFilter("*" + JavaDocJar)
 
-          val jars = ideClasspath ** Jars
+          val classpathJars = ideClasspath ** Jars
+          val allJars = (project.unmanagedClasspath +++ project.managedDependencyPath) ** Jars
 
-          val sources = jars ** Sources
-          val javadoc = jars ** JavaDocs
-          val classes = jars --- sources --- javadoc
+          val sources = allJars ** Sources
+          val javadoc = allJars ** JavaDocs
+          val classes = classpathJars --- sources --- javadoc
 
           def cut(name: String, c: String) = name.substring(0, name.length - c.length)
-          def named(pf: PathFinder, suffix: String) = Map() ++ pf.getFiles.map(relativePath _).map(path => (cut(path, suffix), path))
+          def named(pf: PathFinder, suffix: String) = Map() ++ pf.getFiles.map(file =>
+            cut(file.getName, suffix) -> relativePath(file))
 
           val namedSources = named(sources, SourcesJar)
           val namedJavadoc = named(javadoc, JavaDocJar)
@@ -104,8 +112,7 @@ class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger)
               None //default
           }
 
-          val names = namedSources.keySet ++ namedJavadoc.keySet ++ namedClasses.keySet
-
+          val names = namedClasses.keySet
           val libs = new scala.xml.NodeBuffer
           names.foreach {
             name =>
@@ -148,6 +155,14 @@ class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger)
         <root url={url}/>
       }.getOrElse(NodeSeq.Empty)
 
+    def moduleName(jarPath: Option[String]): Option[String] = {
+      val Regex = """.*/(.*)-[0-9|\.]*.jar$""".r
+      jarPath flatMap {
+        case Regex(grp) => Some(grp)
+        case _ => None
+      }
+    }
+
     val orderEntry =
     <orderEntry type="module-library" exported=" ">
       <library>
@@ -156,6 +171,13 @@ class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger)
         </CLASSES>
         <JAVADOC>
           { root(javadoc) }
+          { val docUrl = for {
+              i <- moduleName(classes);
+              j <- project.libraryDependencies.find(_.name == i);
+              k <- j.extraAttributes.get("e:docUrl")
+            } yield <root url={k}/>
+            docUrl.getOrElse(NodeSeq.Empty)
+          }
         </JAVADOC>
         <SOURCES>
           { root(sources) }
