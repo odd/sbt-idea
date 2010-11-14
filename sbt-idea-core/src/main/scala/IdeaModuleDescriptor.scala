@@ -44,7 +44,7 @@ class IdeaModuleDescriptor(val project: BasicDependencyProject, val log: Logger)
         </content>
         {
           project match {
-            case sp: ScalaPaths =>
+            case sp: ScalaPaths if ! env.compileWithIdea.value =>
               val nodeBuffer = new xml.NodeBuffer
               if (sp.testResources.getFiles.exists(_.exists))
                 nodeBuffer &+ moduleLibrary(Some("TEST"), None, None,

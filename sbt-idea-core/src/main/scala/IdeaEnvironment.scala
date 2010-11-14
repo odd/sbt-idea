@@ -12,6 +12,7 @@ class IdeaEnvironment(project: Project) extends BasicEnvironment {
   lazy val includeSbtProjectDefinitionModule = propertyOptional[Boolean](true, true)
   lazy val projectOutputPath = propertyLocal[String]
   lazy val excludeLibmanagedFolders = propertyOptional[Boolean](false, true)
+  lazy val compileWithIdea = propertyOptional[Boolean](false, true)
 
   def envBackingPath = project.info.builderPath / "idea.properties"
   def log = project.log 
